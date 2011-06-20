@@ -21,6 +21,7 @@ we need to build this project use ccmake.
 
 7, you need first build ffmpeg
    make ds_gnupkg_config
+
    make ds_gunpkg_build
 
 8, after build ffmpeg, you can build application.
