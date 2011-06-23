@@ -9,7 +9,7 @@
 #include "util_lock.h"
 #include "../config/stl_config.h"
 
-#define SDL_AUDIO_BUFFER_SIZE 1024
+#define SDL_AUDIO_BUFFER_SIZE 4096 //1024
 typedef struct _SoundFrame {
     int len;
     int index;
