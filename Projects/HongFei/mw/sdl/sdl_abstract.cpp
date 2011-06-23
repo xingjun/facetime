@@ -67,6 +67,7 @@ int SdlAbstract::Init (AVStream *vstream, AVStream *astream) {
         wanted_spec.callback = SdlAbstract::AudioCallbackStub;
         wanted_spec.userdata = this;
     
+        DEBUG ("sample_rate: %d, channels:%d", wanted_spec.freq, wanted_spec.channels);
         if(SDL_OpenAudio(&wanted_spec, &spec) < 0) {
             ERROR("SDL_OpenAudio: %s", SDL_GetError());
             return -1;
@@ -151,48 +152,51 @@ void SdlAbstract::AudioCallbackStub (void *userdata, Uint8 *stream, int len) {
         sdl->AudioCallback (stream, len);
     }
 }
+
 void SdlAbstract::AudioCallback (Uint8 *stream, int len) {
     //DEBUG ("stream=%p, len=%d", stream, len);
     mOperationLock.Lock ();
-    //DEBUG ("current frame: data=%p, len=%d, index=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index);
-    if (mCurrentFrame.len > 0) {
-        if (mCurrentFrame.index >= mCurrentFrame.len - 1) {
-            //DEBUG("a frame. get new frame!");
+    int pushed_len = 0;
+    int total_len = len;
+
+    while (pushed_len < total_len) {
+        if (mCurrentFrame.len > 0) {
+            if (mCurrentFrame.index >= mCurrentFrame.len - 1) {
+                //DEBUG("a frame. get new frame!");
+                if (mDeque.size() > 0) {
+                    mCurrentFrame = mDeque.front ();
+                    mDeque.pop_front ();
+                } else {
+                    //DEBUG ("no new frame. we need return");
+                    break;
+                }
+            }
+        } else {
             if (mDeque.size() > 0) {
                 mCurrentFrame = mDeque.front ();
                 mDeque.pop_front ();
             } else {
-                //DEBUG ("no new frame.");
+                break;
             }
-        } else {
-            // get data.
-            int len1 = mCurrentFrame.len - mCurrentFrame.index;
-            if (len1 >= len) {
-                memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, len);
-                mCurrentFrame.index += len;
-            } else {
-                DEBUG ("data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, len1, stream, len);
-                memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, len1);
-                mCurrentFrame.index += len1;
-                stream += len1;
-                if (mDeque.size() > 0) {
-                    //DEBUG ("the stream not full! get more data! need %d more!", len-len1);
-                    mCurrentFrame = mDeque.front ();
-                    mDeque.pop_front ();
+        }
 
-                    int len2 = len - len1;
-                    len2 = len2 > mCurrentFrame.len ? mCurrentFrame.len : len2;
-                    DEBUG ("data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, len1, stream, len2);
-                    memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, len2);
-                    mCurrentFrame.index += len2;
-                }
-            }
+        // get a valid frame in mCurrentFrame.
+        int need_len = total_len - pushed_len;
+        int current_frame_len = mCurrentFrame.len - mCurrentFrame.index;
+        if (current_frame_len >= need_len) {
+            //DEBUG ("data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, current_frame_len, stream, need_len);
+            memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, need_len);
+            mCurrentFrame.index += need_len;
+            pushed_len += need_len;
+            // get enough data, we break;
+            break;
+        } else {
+            //DEBUG ("data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, current_frame_len, stream, need_len);
+            memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, current_frame_len);
+            mCurrentFrame.index += current_frame_len;
+            pushed_len += current_frame_len;
         }
-    } else {
-        if (mDeque.size() > 0) {
-            mCurrentFrame = mDeque.front ();
-            mDeque.pop_front ();
-        }
+
     }
     mOperationLock.Unlock ();
 }

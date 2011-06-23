@@ -52,7 +52,7 @@ void AudioPlay::ThreadEntry () {
                 }
             
                 double diff = frame_pts - curr_pts;
-                DEBUG ("A:curr_pts=%f, frame_pts=%f, diff=%f", curr_pts, frame_pts, diff);
+                //DEBUG ("A:curr_pts=%f, frame_pts=%f, diff=%f", curr_pts, frame_pts, diff);
 
                 if (fabs(diff) < MasterClock::AVThresholdNoSync) {
                     if (diff <= 0) {

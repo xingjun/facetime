@@ -46,7 +46,7 @@ void VideoPlay::ThreadEntry () {
             }
             
             double diff = frame_pts - curr_pts;
-            DEBUG ("V:curr_pts=%f, frame_pts=%f, diff=%f", curr_pts, frame_pts, diff);
+            //DEBUG ("V:curr_pts=%f, frame_pts=%f, diff=%f", curr_pts, frame_pts, diff);
 
             if (fabs(diff) < MasterClock::AVThresholdNoSync) {
                 if (diff <= 0) {
