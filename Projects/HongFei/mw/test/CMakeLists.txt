@@ -5,3 +5,7 @@ TARGET_LINK_LIBRARIES (packetlist windplayer)
 ##test_decoder
 ADD_EXECUTABLE(decoder test_decoder.cpp)
 TARGET_LINK_LIBRARIES (decoder windplayer)
+
+##test_decoder
+ADD_EXECUTABLE(recorder test_record.cpp)
+TARGET_LINK_LIBRARIES (recorder windplayer)
