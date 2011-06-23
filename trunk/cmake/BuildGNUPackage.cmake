@@ -79,4 +79,4 @@ ADD_DEPENDENCIES(ds_gnupkg_build
 ## set parameters for DS_USE(xx) to use.
 SET(DS_FFMPEG_INCLUDE_DIR ${GNUPKG_INSTALL_PATH}/include)
 SET(DS_FFMPEG_LIBRARY_DIR ${GNUPKG_INSTALL_PATH}/lib)
-SET(DS_FFMPEG_LIBS swscale avformat avfilter avdevice avcodec avutil)
+SET(DS_FFMPEG_LIBS swscale avformat avfilter avdevice avcodec avutil asound z dl m pthread)
