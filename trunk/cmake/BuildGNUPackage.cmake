@@ -76,7 +76,7 @@ ADD_DEPENDENCIES(ds_gnupkg_build
     ${GNUPKG_BUILD_TARGETS}
     )
 
-## set parameters for DS_USE(xx) to use.
-SET(DS_FFMPEG_INCLUDE_DIR ${GNUPKG_INSTALL_PATH}/include)
-SET(DS_FFMPEG_LIBRARY_DIR ${GNUPKG_INSTALL_PATH}/lib)
-SET(DS_FFMPEG_LIBS swscale avformat avfilter avdevice avcodec avutil asound z dl m pthread)
+## set parameters for DS_USE(xx) to use. (if you want to use system ffmpeg, you should comment bellow 3 lines)
+#SET(DS_FFMPEG_INCLUDE_DIR ${GNUPKG_INSTALL_PATH}/include)
+#SET(DS_FFMPEG_LIBRARY_DIR ${GNUPKG_INSTALL_PATH}/lib)
+#SET(DS_FFMPEG_LIBS swscale avformat avfilter avdevice avcodec avutil asound z dl m pthread)
