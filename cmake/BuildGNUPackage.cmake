@@ -57,7 +57,7 @@ MACRO(BUILD_GNU_PACKAGE _pkg_name _pkg_rpath)
 ENDMACRO(BUILD_GNU_PACKAGE)
 
 ## begin add libraries to configure.
-CONFIG_GNU_PACKAGE(libffmpeg_cfg 3rdParties/ffmpeg-0.7-rc1 "")
+CONFIG_GNU_PACKAGE(libffmpeg_cfg 3rdParties/ffmpeg-0.8 "")
 
 ADD_CUSTOM_TARGET(ds_gnupkg_config
     COMMENT "config done all gnu packages!"
@@ -67,7 +67,7 @@ ADD_DEPENDENCIES(ds_gnupkg_config
     )
 
 ## begin add libraries to build.
-BUILD_GNU_PACKAGE(libffmpeg_build 3rdParties/ffmpeg-0.7-rc1)
+BUILD_GNU_PACKAGE(libffmpeg_build 3rdParties/ffmpeg-0.8)
 
 ADD_CUSTOM_TARGET(ds_gnupkg_build
     COMMENT "built done all gnu packages"
@@ -77,6 +77,6 @@ ADD_DEPENDENCIES(ds_gnupkg_build
     )
 
 ## set parameters for DS_USE(xx) to use. (if you want to use system ffmpeg, you should comment bellow 3 lines)
-#SET(DS_FFMPEG_INCLUDE_DIR ${GNUPKG_INSTALL_PATH}/include)
-#SET(DS_FFMPEG_LIBRARY_DIR ${GNUPKG_INSTALL_PATH}/lib)
-#SET(DS_FFMPEG_LIBS swscale avformat avfilter avdevice avcodec avutil asound z dl m pthread)
+SET(DS_FFMPEG_INCLUDE_DIR ${GNUPKG_INSTALL_PATH}/include)
+SET(DS_FFMPEG_LIBRARY_DIR ${GNUPKG_INSTALL_PATH}/lib)
+SET(DS_FFMPEG_LIBS swscale avformat avfilter avdevice avcodec avutil asound SDL z dl m pthread)

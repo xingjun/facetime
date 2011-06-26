@@ -14,8 +14,8 @@ TARGET_LINK_LIBRARIES (sdlplayer windplayer SDL)
 
 
 #tutorial
-ADD_EXECUTABLE(tutorial tutorial07.c)
-TARGET_LINK_LIBRARIES (tutorial 
-    SDL
-    z
-)
+#ADD_EXECUTABLE(tutorial tutorial07.c)
+#TARGET_LINK_LIBRARIES (tutorial 
+#    SDL
+#    z
+#)

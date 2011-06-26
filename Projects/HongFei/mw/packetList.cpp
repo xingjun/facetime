@@ -80,7 +80,8 @@ int PacketQueue::put (AVPacket* pkt, int size) {
     for (;;) {
         if (mbToFlush) {
             mLock.Unlock ();
-            av_free_packet(pkt);
+            if (pkt->data != NULL)
+                av_free_packet(pkt);
             DEBUG ("flush return");
             return -1;
         }
