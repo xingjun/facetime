@@ -22,7 +22,7 @@ int SdlAbstract::Init (AVStream *vstream, AVStream *astream) {
         ERROR("Could not initialize SDL - %s", SDL_GetError());
         return -1;
     }
-
+    DEBUG ("vstream:%p, astream:%p", vstream, astream);
     SDL_Surface* screen = NULL;
     // Make a screen to put our video
 #ifndef __DARWIN__
@@ -40,6 +40,7 @@ int SdlAbstract::Init (AVStream *vstream, AVStream *astream) {
     SwsContext *img_convert_ctx = NULL;
     if (vstream != NULL) {
         AVCodecContext *codecCtx = vstream->codec;
+        DEBUG ("codec:%p", codecCtx);
         width = codecCtx->width;
         height = codecCtx->height;
         bmp = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, screen);
@@ -154,7 +155,7 @@ void SdlAbstract::AudioCallbackStub (void *userdata, Uint8 *stream, int len) {
 }
 
 void SdlAbstract::AudioCallback (Uint8 *stream, int len) {
-    //DEBUG ("stream=%p, len=%d", stream, len);
+    DEBUG ("require stream=%p, len=%d", stream, len);
     mOperationLock.Lock ();
     int pushed_len = 0;
     int total_len = len;
@@ -184,15 +185,17 @@ void SdlAbstract::AudioCallback (Uint8 *stream, int len) {
         int need_len = total_len - pushed_len;
         int current_frame_len = mCurrentFrame.len - mCurrentFrame.index;
         if (current_frame_len >= need_len) {
-            //DEBUG ("data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, current_frame_len, stream, need_len);
+            DEBUG ("sendlen=%d, frame info: data=%p, index=%d, len=%d", need_len, mCurrentFrame.data, mCurrentFrame.index, mCurrentFrame.len);
             memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, need_len);
+            stream += need_len;
             mCurrentFrame.index += need_len;
             pushed_len += need_len;
             // get enough data, we break;
             break;
         } else {
-            //DEBUG ("data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, current_frame_len, stream, need_len);
+            DEBUG ("sendlen=%d, data=%p, len=%d, index=%d, need=%d, stream=%p, len=%d", current_frame_len, mCurrentFrame.data, mCurrentFrame.len, mCurrentFrame.index, current_frame_len, stream, need_len);
             memcpy (stream, mCurrentFrame.data + mCurrentFrame.index, current_frame_len);
+            stream += current_frame_len;
             mCurrentFrame.index += current_frame_len;
             pushed_len += current_frame_len;
         }

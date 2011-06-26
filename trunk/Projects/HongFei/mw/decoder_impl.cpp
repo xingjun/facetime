@@ -23,7 +23,13 @@ int AudioDecoder::Decode (AVCodecContext *avctx, int16_t *samples, int *frame_si
     }
     *pts = 0;
 
-    int len1 = avcodec_decode_audio2 (avctx, samples, frame_size_ptr, avpkt->data+ignore_size, avpkt->size-ignore_size);
+    //int len1 = avcodec_decode_audio2 (avctx, samples, frame_size_ptr, avpkt->data+ignore_size, avpkt->size-ignore_size);
+    AVPacket pkt;
+    memcpy (&pkt, avpkt, sizeof (AVPacket));
+    pkt.destruct = NULL;
+    pkt.data += ignore_size;
+    pkt.size -= ignore_size;
+    int len1 = avcodec_decode_audio3 (avctx, samples, frame_size_ptr, &pkt);
     if (len1 < 0) {
         ERROR ("decode audio error!");
         return len1;
@@ -35,7 +41,7 @@ int AudioDecoder::Decode (AVCodecContext *avctx, int16_t *samples, int *frame_si
     int64_t currPts = mNextPts;
     int data_size = *frame_size_ptr;
     if (ignore_size == 0)
-        currPts = avpkt->pts;
+        currPts = pkt.pts;
     mNextPts = currPts + data_size / (2 * avctx->channels * avctx->sample_rate) * (mTimebase.den/mTimebase.num);
     //mNextPts = currPts + data_size / (2 * avctx->channels * avctx->sample_rate);
     //DEBUG ("mNextPts=%lld, currPts=%lld, data_size=%d, channels=%d, sample_rate=%d, den=%d, num=%d", mNextPts, currPts, data_size, avctx->channels, avctx->sample_rate, mTimebase.den, mTimebase.num);
@@ -76,8 +82,8 @@ int VideoDecoder::Decode (AVCodecContext *avctx, AVFrame *picture, int *got_pict
 
     int64_t gotPts = 0;
     global_pkt_pts = avpkt->pts;
-    //int len1 = avcodec_decode_video2 (avctx, picture, got_picture_ptr, avpkt);
-    int len1 = avcodec_decode_video (avctx, picture, got_picture_ptr, avpkt->data, avpkt->size);
+    int len1 = avcodec_decode_video2 (avctx, picture, got_picture_ptr, avpkt);
+    //int len1 = avcodec_decode_video (avctx, picture, got_picture_ptr, avpkt->data, avpkt->size);
 
     if(avpkt->dts == AV_NOPTS_VALUE && picture->opaque != NULL && *(uint64_t*)picture->opaque != AV_NOPTS_VALUE) {
         gotPts = *(uint64_t *)picture->opaque;

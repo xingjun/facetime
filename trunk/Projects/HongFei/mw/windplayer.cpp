@@ -86,6 +86,7 @@ AVStream* WindPlayer::GetVideoStream () {
     }
 
     int vid = mpDecoder->GetVideoStreamIndex ();
+    DEBUG ("formatCtx=%p, vid=%d", formatCtx, vid);
     if (vid >= 0) {
         return formatCtx->streams[vid];
     }
@@ -105,6 +106,7 @@ AVStream* WindPlayer::GetAudioStream () {
     }
 
     int aid = mpDecoder->GetAudioStreamIndex ();
+    DEBUG ("formatCtx=%p, aid=%d", formatCtx, aid);
     if (aid >= 0) {
         return formatCtx->streams[aid];
     }

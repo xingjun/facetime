@@ -105,14 +105,17 @@ int WindDecoder::OpenInputFile (string url) {
   
     // Find the first video stream
     for(int i = 0; i < pFormatCtx->nb_streams; i++) {
-        if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO && video_index < 0) {
+        enum AVMediaType codec_type = pFormatCtx->streams[i]->codec->codec_type;
+        DEBUG ("i=%d, codec=%p", i, pFormatCtx->streams[i]->codec);
+        if(codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0) {
             video_index=i;
         }
-        if(pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_AUDIO && audio_index < 0) {
+        if(codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0) {
             audio_index=i;
         }
     }
-
+    DEBUG ("audio_index=%d, video_index=%d", audio_index, video_index);
+    DEBUG ("pFormatCtx=%p, vstream=%p, astream=%p", pFormatCtx, pFormatCtx->streams[video_index], pFormatCtx->streams[audio_index]);
     if (audio_index < 0 && video_index < 0) {
         ERROR ("there is no audio or video stream in the file, quit!");
         av_close_input_file (pFormatCtx);
