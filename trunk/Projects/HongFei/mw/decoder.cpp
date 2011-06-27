@@ -6,6 +6,7 @@ WindDecoder::WindDecoder () : msUrl(""), mbQuit(false), mOperationLock("WindDeco
 
     // Register all formats and codecs
     av_register_all();
+    avdevice_register_all();
 
 }
 WindDecoder::~WindDecoder () {
@@ -31,10 +32,9 @@ int WindDecoder::Start () {
     mAudioQueue.init ();
     mbQuit = false;
     if (AvSeekFrame (0) < 0) {
-        ERROR ("seek fail!");
-    } else {
-        ThreadExec ();
+        WARN ("seek fail!");
     }
+    ThreadExec ();
     mOperationLock.Unlock ();
     return 0;
 }
@@ -87,14 +87,28 @@ int WindDecoder::OpenInputFile (string url) {
     int video_index = -1;
     int audio_index = -1;
 
+    AVInputFormat *inputFmt = NULL;
+    AVFormatParameters inputFmtParameter;
+    memset ( &inputFmtParameter, 0, sizeof(inputFmtParameter));
+    if (url == "/dev/video0") {
+        const char* camera_format = "video4linux2";
+        inputFmt = av_find_input_format (camera_format); 
+        if (inputFmt == NULL) {
+            ERROR ("can not find input deivce: %s", camera_format);
+            return -1;
+        }
+ 
+        inputFmtParameter.width  = 320;
+        inputFmtParameter.height = 240;
+    }
     // Open video file
-    if(av_open_input_file(&pFormatCtx, url.c_str (), NULL, 0, NULL)!=0) {
+    if (av_open_input_file(&pFormatCtx, url.c_str (), inputFmt, sizeof(inputFmtParameter), &inputFmtParameter)!=0) {
         ERROR ("Couldn't open file:%s", url.c_str ());
         return -1;
     }
 
     // Retrieve stream information
-    if(av_find_stream_info(pFormatCtx)<0) {
+    if (av_find_stream_info(pFormatCtx)<0) {
         ERROR ("Couldn't find stream information!");
         av_close_input_file (pFormatCtx);
         return -1;
@@ -196,7 +210,7 @@ void WindDecoder::ThreadEntry () {
         if(mbQuit) {
             break;
         }
-
+        //DEBUG ("read one frame");
         if(av_read_frame(pFormatCtx, packet) < 0) {
             INFO ("av_read_frame fail, reach end of file or an error occur!");
             break;
